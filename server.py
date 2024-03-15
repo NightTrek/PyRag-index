@@ -1,8 +1,14 @@
 from flask import Flask, request, jsonify
 import requests
 import os
+from ragatouilleUtils import create_or_load_index
 
 app = Flask(__name__)
+
+os.environ["OPENAI_API_KEY"] = "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" # OpenAI API key
+default_dir = 'arxiv-pdfs' # Default directory to index
+RAG = create_or_load_index(default_dir) # Create or load the index
+print(RAG)
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -61,8 +67,5 @@ def chat():
     return response.json()
 
 
-if __name__ == '__main__':
-    os.environ["OPENAI_API_KEY"] = "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" # OpenAI API key
-    default_dir = 'mini-arxiv-pdfs' # Default directory to index
-    
-    app.run(port=3592)
+# if __name__ == '__main__':
+#     app.run(port=3592)
