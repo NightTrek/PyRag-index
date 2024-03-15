@@ -23,9 +23,9 @@ def custom_print(*args, **kwargs):
 def create_or_load_index(index_path):
     RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
     print("initializing index")
-    if os.path.exists(index_path + "/arxiv-index"):
+    if os.path.exists(".ragatouille/colbert/indexes/arxiv-index/plan.json"):
         debug("Loading existing index...")
-        return RAG.from_index("arxiv-pdfs/arxiv-index")
+        return RAG.from_index(".ragatouille/colbert/indexes/arxiv-index/")
     else:
         debug("BEGINGING DOCUMENT INDEXING...")
         # get document chunks

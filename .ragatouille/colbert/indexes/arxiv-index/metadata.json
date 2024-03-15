@@ -73,6 +73,6 @@
     },
     "num_chunks": 1,
     "num_partitions": 128,
-    "num_embeddings_est": 170.0,
-    "avg_doclen_est": 8.5
+    "num_embeddings": 170,
+    "avg_doclen": 8.5
 }

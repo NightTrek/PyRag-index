@@ -6,7 +6,7 @@ from ragatouilleUtils import create_or_load_index
 app = Flask(__name__)
 
 os.environ["OPENAI_API_KEY"] = "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" # OpenAI API key
-default_dir = 'arxiv-pdfs' # Default directory to index
+default_dir = 'mini-arxiv-pdfs' # Default directory to index
 RAG = create_or_load_index(default_dir) # Create or load the index
 print(RAG)
 
@@ -27,10 +27,7 @@ def chat():
     frequency_penalty = data.get('frequency_penalty', 0)
     presence_penalty = data.get('presence_penalty', 0)
 
-    print("========= Request: =============")
-    print(f"Model: {model}")
-    print(f"Prompt: {prompt}")
-    print(f"Temperature: {temperature}")
+
 
     if prompt.startswith('/'):
         command = prompt[1:].split(' ')[0]
@@ -42,7 +39,14 @@ def chat():
             return jsonify({'choices': [{'text': f'Changed directory to {directory}'}]})
         else:
             return jsonify({'choices': [{'text': f'Unknown command: {command}. Use /help to see available commands.'}]})
+    results = RAG.search(query=prompt)
+    print ("========= RAG CONTEXT: =============")
+    print(results)
 
+    print("========= Request: =============")
+    print(f"Model: {model}")
+    print("Context: " + results + "\n user:" + prompt)
+    print(f"Temperature: {temperature}")
     # Make a request to the OpenAI API
     response = requests.post(
         'https://api.openai.com/v1/completions',
@@ -52,7 +56,7 @@ def chat():
         },
         json={
             'model': 'gpt-3.5-turbo-instruct',
-            'prompt': prompt,
+            'prompt': "Context: " + results + "\n user:" + prompt,
             'temperature': temperature,
             'max_tokens': max_tokens,
             'top_p': top_p,
@@ -67,5 +71,5 @@ def chat():
     return response.json()
 
 
-# if __name__ == '__main__':
-#     app.run(port=3592)
+if __name__ == '__main__':
+    app.run(port=3592)
