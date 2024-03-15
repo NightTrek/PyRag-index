@@ -74,3 +74,4 @@ folder_path = os.path.join(os.getcwd(), 'arxiv-pdfs')
 
 # Execute the function
 download_pdfs(url, folder_path)
+
