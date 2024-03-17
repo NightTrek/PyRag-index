@@ -9,7 +9,7 @@
         "ndocs": null,
         "load_index_with_mmap": false,
         "index_path": null,
-        "index_bsize": 32,
+        "index_bsize": 16,
         "nbits": 8,
         "kmeans_niters": 20,
         "resume": false,
@@ -37,26 +37,12 @@
         "checkpoint": "colbert-ir\/colbertv2.0",
         "triples": "\/future\/u\/okhattab\/root\/unit\/experiments\/2021.10\/downstream.distillation.round2.2_score\/round2.nway6.cosine.ib\/examples.64.json",
         "collection": [
-            "2401.00009.pdf",
-            "2401.00020.pdf",
-            "2401.00209.pdf",
-            "2401.00037.pdf",
-            "2401.00033.pdf",
-            "2401.00031.pdf",
-            "2401.00125.pdf",
-            "2401.00132.pdf",
-            "2401.00062.pdf",
-            "2401.00139.pdf",
-            "2401.00110.pdf",
-            "2401.00104.pdf",
-            "2401.00161.pdf",
-            "2401.00015.pdf",
-            "2401.00006.pdf",
-            "2401.00211.pdf",
-            "2401.00007.pdf",
-            "2401.00005.pdf",
-            "2401.00158.pdf",
-            "2401.00004.pdf"
+            "list with 1992 elements starting with...",
+            [
+                "Turing\u2019s Test, a Beautiful Thought Experiment\nBernardo Gon\u00e7alves\n\u2217\nPolytechnic School, University of S\u00e3o Paulo\nBrazil\nbegoncalves@usp.br\nABSTRACT\nIn the wake of large language models, there has been a resurgence\nof claims and questions about the Turing test and its value for AI,\nwhich are reminiscent of decades of practical \u201cTuring\u201d tests. If AI\nwere quantum physics, by now several \u201cSchr\u00f6dinger\u2019s\u201d cats could\nhave been killed. Better late than never, it is time for a historical\nreconstruction of Turing\u2019s beautiful thought experiment. In this\npaper I present a wealth of evidence, including new archival sources,\ngive original answers to several open questions about Turing\u2019s 1950\npaper, and address the core question of the value of Turing\u2019s test.",
+                "In this\npaper I present a wealth of evidence, including new archival sources,\ngive original answers to several open questions about Turing\u2019s 1950\npaper, and address the core question of the value of Turing\u2019s test.\nKEYWORDS\nAlan Turing, Turing test, Thought experiment, Foundations of AI &\ncomputer science, Galileo Galilei, History of science, History of AI\n1 INTRODUCTION\nIn recent decades, the Turing test has been used as a practical exper-\niment for publicity purposes and aptly criticized [ 31,32,39], and has\nbeen the whipping boy of AI [ 16], cognitive sciences and analytic\nphilosophy [ 33], and increasingly, with the rise of AI, the humani-\nties and social sciences [ 3]. It is not uncommon for criticism coming\nfrom all these areas to take Turing\u2019s test literally, assuming that\nhe encouraged deception as a criterion and\/or proposed a crucial\nexperiment to establish the existence of machine intelligence.\nNow, in the wake of large language models, science and technol-\nogy outlets ask whether Turing\u2019s test can be a \u2018benchmark\u2019 for AI\n[2], and whether it is \u2018dead\u2019 [ 40].",
+                "Now, in the wake of large language models, science and technol-\nogy outlets ask whether Turing\u2019s test can be a \u2018benchmark\u2019 for AI\n[2], and whether it is \u2018dead\u2019 [ 40]. Based on recent primary research\n[10\u201314], in this paper I present a mass of evidence, including newly\ndiscovered archival sources, and a new perspective on Turing\u2019s test.\nI address a few problems that we will keep track as we go along:\n(\ud835\udc431) Why would Turing design a test based on imitation, which can\nbe seen as encouraging deception? ( \ud835\udc432) Why to present multiple\nversions of a test, as opposed to a well-defined, controlled experi-\nment? ( \ud835\udc433) Why gender imitation in a test of machine intelligence,\nand why conversation for an intelligence task? ( \ud835\udc434) Why are practi-\ncal \u201cTuring\u201d tests circular, as Hayes and Ford [ 16] claimed? Finally,\nthe core problem, ( \ud835\udc435) What is the value of Turing\u2019s test for AI?\nSection 2 presents a reading of Turing\u2019s 1950 paper."
+            ]
         ],
         "queries": "\/future\/u\/okhattab\/data\/MSMARCO\/queries.train.tsv",
         "index_name": "arxiv-index",
@@ -64,7 +50,7 @@
         "root": ".ragatouille\/",
         "experiment": "colbert",
         "index_root": null,
-        "name": "2024-03\/15\/03.46.42",
+        "name": "2024-03\/16\/16.09.28",
         "rank": 0,
         "nranks": 1,
         "amp": true,
@@ -72,7 +58,7 @@
         "avoid_fork_if_possible": false
     },
     "num_chunks": 1,
-    "num_partitions": 128,
-    "num_embeddings_est": 170.0,
-    "avg_doclen_est": 8.5
+    "num_partitions": 8192,
+    "num_embeddings_est": 343009.99255371094,
+    "avg_doclen_est": 172.1937713623047
 }

@@ -1,14 +1,16 @@
 from flask import Flask, request, jsonify
-import requests
-import os
 from ragatouilleUtils import create_or_load_index
+from init import init
+import openai
 
 app = Flask(__name__)
+init() # set the environment variables
 
-os.environ["OPENAI_API_KEY"] = "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" # OpenAI API key
 default_dir = 'mini-arxiv-pdfs' # Default directory to index
 RAG = create_or_load_index(default_dir) # Create or load the index
 print(RAG)
+
+
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -47,28 +49,21 @@ def chat():
     print(f"Model: {model}")
     print("Context: " + results + "\n user:" + prompt)
     print(f"Temperature: {temperature}")
-    # Make a request to the OpenAI API
-    response = requests.post(
-        'https://api.openai.com/v1/completions',
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {os.environ["OPENAI_API_KEY"]}'
-        },
-        json={
-            'model': 'gpt-3.5-turbo-instruct',
-            'prompt': "Context: " + results + "\n user:" + prompt,
-            'temperature': temperature,
-            'max_tokens': max_tokens,
-            'top_p': top_p,
-            'frequency_penalty': frequency_penalty,
-            'presence_penalty': presence_penalty
-        }
+    # Make a request to the OpenAI API using the SDK
+    response = openai.Completion.create(
+        engine='gpt-3.5-turbo-instruct',
+        prompt="Context: " + results + "\n user:" + prompt,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p,
+        frequency_penalty=frequency_penalty,
+        presence_penalty=presence_penalty
     )
     # print("========= Response: =============")
 
-    # print(response.json())
+    # print(response)
     # Return the response as JSON
-    return response.json()
+    return jsonify(response)
 
 
 if __name__ == '__main__':

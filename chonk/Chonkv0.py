@@ -2,6 +2,7 @@ import PyPDF2
 import tiktoken
 from concurrent.futures import ThreadPoolExecutor
 import os
+import re
 
 def process_pdfs_in_folder(folder, worker_threads=12):
     pdf_files = [file for file in os.listdir(folder) if file.endswith(".pdf")]
@@ -13,22 +14,23 @@ def process_pdfs_in_folder(folder, worker_threads=12):
             future = executor.submit(process_pdf, pdf_path)
             futures.append(future)
         
-        text_chunks = []
+        documents_list = []
         doc_id_list = []
+        metadata_list = []
         for future in futures:
-            chunks, document_id, metadata = future.result()
-            doc_id_list.extend([document_id] * len(chunks))
-                                                                                                        
-            text_chunks.extend(chunks)
+            text, document_id, metadata = future.result()
+            documents_list.append(text)
+            doc_id_list.append(document_id)
+            metadata_list.append(metadata)
     
-    return text_chunks
+    return documents_list, doc_id_list, metadata_list
 
 def process_pdf(pdf_path):
     text, title = PDF_to_text(pdf_path)
-    chunks = Chunk_text(text)
+    # chunks = Chunk_text(text)
     document_id = os.path.basename(pdf_path).rstrip(".pdf")
     metadata = {"title": title}
-    return chunks, document_id, metadata
+    return text, document_id, metadata
 
 def PDF_to_text(pdf_path):
     with open(pdf_path, 'rb') as file:
@@ -38,19 +40,25 @@ def PDF_to_text(pdf_path):
         for page in reader.pages:
             text += page.extract_text()
             if not title:
-                title_match = reader.search(r'(?i)^(title|h1):\s*(.+)$', text, reader.MULTILINE)
+                title_match = re.search(r'(?i)^(title|h1):\s*(.+)', text, re.MULTILINE)
                 if title_match:
                     title = title_match.group(2)
     return text, title
 
-
-# uses an LLM text chunking algorithm to divide a large text into chunks of a fixed size tokens (default 256) 
 def Chunk_text(text, chunk_size=256):
     encoding = tiktoken.get_encoding("cl100k_base")
     tokens = encoding.encode(text)
     chunks = []
-    for i in range(0, len(tokens), chunk_size):
-        chunk = encoding.decode(tokens[i:i+chunk_size])
+    start_idx = 0
+    while start_idx < len(tokens):
+        end_idx = min(start_idx + chunk_size, len(tokens))
+        if end_idx < len(tokens):
+            # Find the nearest end of sentence or paragraph within a certain tolerance
+            tolerance = chunk_size // 10
+            while end_idx < len(tokens) and tokens[end_idx] not in {encoding.encode('.')[0], encoding.encode('!')[0], encoding.encode('?')[0], encoding.encode('\n')[0]} and end_idx - start_idx < chunk_size + tolerance:
+                end_idx += 1
+        chunk_tokens = tokens[start_idx:end_idx]
+        chunk = encoding.decode(chunk_tokens)
         chunks.append(chunk)
+        start_idx = end_idx
     return chunks
-
