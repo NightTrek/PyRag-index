@@ -1,16 +1,15 @@
 from flask import Flask, request, jsonify
-from ragatouilleUtils import create_or_load_index
 from init import init
-import openai
+
+from vaultAPI.retrival_test import retrive_chunks, ask_question
+from chromaDBScripts.createIndexFromFolder import query_chroma
 
 app = Flask(__name__)
-init() # set the environment variables
+
 
 default_dir = 'mini-arxiv-pdfs' # Default directory to index
-RAG = create_or_load_index(default_dir) # Create or load the index
-print(RAG)
 
-
+client = init() # set the environment variables
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -41,29 +40,56 @@ def chat():
             return jsonify({'choices': [{'text': f'Changed directory to {directory}'}]})
         else:
             return jsonify({'choices': [{'text': f'Unknown command: {command}. Use /help to see available commands.'}]})
-    results = RAG.search(query=prompt)
+    
     print ("========= RAG CONTEXT: =============")
-    print(results)
-
+    # vault_response = retrive_chunks(prompt)
+    # print("============= Vault responded =============")
+    # print(vault_response)
+    chroma_response = query_chroma(prompt, 'arxiv-pdfs')
+    print("============= Chroma responded =============")
+    print(chroma_response)
     print("========= Request: =============")
-    print(f"Model: {model}")
-    print("Context: " + results + "\n user:" + prompt)
-    print(f"Temperature: {temperature}")
-    # Make a request to the OpenAI API using the SDK
-    response = openai.Completion.create(
-        engine='gpt-3.5-turbo-instruct',
-        prompt="Context: " + results + "\n user:" + prompt,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        top_p=top_p,
-        frequency_penalty=frequency_penalty,
-        presence_penalty=presence_penalty
-    )
-    # print("========= Response: =============")
 
-    # print(response)
-    # Return the response as JSON
-    return jsonify(response)
+    # if vault_response is None:
+    #     print("Vault returned None")
+    #     vault_response = ""
+    if chroma_response is None:
+        print("Chroma returned None")
+        chroma_response = ""
+    
+
+    completion = client.chat.completions.create(
+    model='anthropic/claude-3-sonnet',
+    messages=[
+        {"role": "user", "content": "CONTEXT: " + str(chroma_response) + " || QUESTION: " + prompt},
+    ]
+)
+
+    response_data = {
+        "id": completion.id,
+        "object": completion.object,
+        "created": completion.created,
+        "model": completion.model,
+        "choices": [
+            {
+                "index": 0,
+                "message": {
+                    "role": completion.choices[0].message.role,
+                    "content": completion.choices[0].message.content
+                },
+                "logprobs": "null",
+                "finish_reason": completion.choices[0].finish_reason
+            }
+        ],
+        "usage": {
+            "prompt_tokens": completion.usage.prompt_tokens,
+            "completion_tokens": completion.usage.completion_tokens,
+            "total_tokens": completion.usage.total_tokens
+        },
+        "system_fingerprint": "fp_4f2ebda25a"
+    }
+
+    return jsonify(response_data)
 
 
 if __name__ == '__main__':
