@@ -3,3 +3,4 @@ arxiv-env
 mini-arxiv-pdfs
 db
 init.py
+.DS_Store

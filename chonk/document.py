@@ -10,3 +10,10 @@ class Document:
         self.doc_type = doc_type
         self.chunk_ids = chunk_ids
         self.summary = summary
+
+    
+    def get_Chunks(self):
+        """
+        Returns a list of Chunks that are associated with this document.
+        """
+        return [Chunk(self.chunk_ids[i], self.chunk_ids[i+1]) for i in range(0, len(self.chunk_ids), 2)]
