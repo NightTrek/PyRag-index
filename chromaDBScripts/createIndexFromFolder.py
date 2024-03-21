@@ -7,6 +7,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.extractors import TitleExtractor, SummaryExtractor, QuestionsAnsweredExtractor
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
+from pydantic.v1.error_wrappers import ValidationError
 import chromadb
 import json
 
@@ -71,7 +72,13 @@ def fetch_chroma_index(collection_name):
 def query_chroma(query, collection_name = "mini-arxiv-pdfs"):
     vector_index = fetch_chroma_index(collection_name)
     query_engine = vector_index.as_retriever()
-    return query_engine.retrieve(query)
+    try:
+        print("TESTING QUERY: "+ query)
+        results = query_engine.retrieve(query)
+        return [result.text for result in results]
+    except (AttributeError, ValidationError) as e:
+        print(f"Error retrieving results: {str(e)}")
+        return []
 
 def expand_query(query, min=3, max=5):
     llm_ollama = Ollama(model="mistral", request_timeout=30.0)
