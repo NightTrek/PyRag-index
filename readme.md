@@ -2,12 +2,21 @@
 
 PyRAG-Index is a collection of basic Retrieval-Augmented Generation (RAG) implementations that primarily utilize local models for each component. It is designed to work seamlessly with mindMac and Big-AGI clients, providing a foundation for building and experimenting with RAG systems.
 
+## GOAL
+
+I wanted to build a repo with enough tools to make experimenting with different rag systems quick and easy. It is intended to be modified to test new ideas and integrate with other services. The goal is to provide a foundation to build upon. im assiming that anyone using this will be familiar with ML concepts and comfortable modifying code.
+
+key files to look at are the server ```app.py``` which contains the actual retrieval code.
+If you are using chromaDB that of course the primary thing to look at are the chromaDB_scripts/ folder and files to see how documents are indexed and retrieved from chromaDB.
+
 ## Features
 
 - Local model support: PyRAG-Index leverages local models for various parts of the RAG pipeline, enabling offline usage and reducing dependency on external services.
 - ChromaDB integration: The library includes support for ChromaDB, allowing efficient storage and retrieval of document embeddings.
 - VaultAPI compatibility: PyRAG-Index is compatible with VaultAPI, enabling secure storage and access to sensitive data.
 - Easy installation: The library provides an installation script to simplify the setup process.
+- Support for MindMac through api server just add an new Other provider
+- Support for Big-AGI https://github.com/enricoros/big-agi although you need to run it locally.
 
 ## Installation
 

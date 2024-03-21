@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify, Response
 from init import init
 
 from vaultAPI.retrival_test import retrive_chunks, ask_question
-from chromaDBScripts.createIndexFromFolder import query_chroma, expand_query
+from chromadb_scripts.chroma import query_chroma
+from chromadb_scripts.query_tools import expand_query_ollama
 from oAI.openai_utils import convert_chunk_to_api, createChunk, send_chat_message, create_chat_message_chunk
 
 
@@ -93,7 +94,7 @@ def chat():
         yield f"data: {json.dumps(create_chat_message_chunk('.'))}\n\n".encode('utf-8')
 
         print("========= RAG CONTEXT: =============")
-        expanded_queries = expand_query(prompt)
+        expanded_queries = expand_query_ollama(prompt)
         chroma_response = []
         for query in expanded_queries:
             yield f'data: {json.dumps(create_chat_message_chunk("New query: " + query))}\n\n'.encode('utf-8')
@@ -117,6 +118,8 @@ def chat():
 
     return Response(generate(), mimetype='text/event-stream')
 
+# Chat API supporting stream only for testing mindMac issues only
+# Deprecated
 @app.route('/chat', methods=['POST'])
 def streamOnly():
     data = request.get_json()
@@ -126,7 +129,7 @@ def streamOnly():
     # Extract the parameters from the request
     model = data.get('model', 'gpt-3.5-turbo-instruct')
     prompt = next((message['content'] for message in reversed(data['messages']) if message['role'] == 'user'), '')
-    temperature = data.get('temperature', 0.1)
+    temperature = data.get('temperature', 0.5)
     max_tokens = data.get('max_tokens', 256)
     top_p = data.get('top_p', 1)
     frequency_penalty = data.get('frequency_penalty', 0)
@@ -185,6 +188,7 @@ def streamOnly():
 
 @app.route('/v1/models', methods=['GET'])
 def models():
+    
     return jsonify({
   "object": "list",
   "data": [

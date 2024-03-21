@@ -81,10 +81,10 @@ if [[ "$1" == "--production" ]]; then
       echo "Please provide an IP address with the --production flag"
       exit 1
     fi
-    gunicorn --bind $ip_address:3582 app:app
+    gunicorn --bind $ip_address:3592 app:app
 else
   if command -v flask >/dev/null 2>&1; then
-    flask run --reload --port 3582
+    flask run --reload --port 3592
   else
     echo "flask command not found. Please install Flask."
     exit 1
