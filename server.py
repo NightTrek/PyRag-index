@@ -14,7 +14,6 @@ default_dir = 'mini-arxiv-pdfs' # Default directory to index
 
 client = init() # set the environment variables
 
-textEpansion = True
 
 @app.route('/v1/chat/completions', methods=['POST'])
 def chat():
@@ -45,12 +44,6 @@ def chat():
             directory = prompt[len(command)+2:]
             # TODO: Implement logic to change the directory to be indexed
             return jsonify(send_chat_message("TODO implement changing directory"))
-        elif command == 'expand_query':
-            if textEpansion:
-                textEpansion = False
-            else:
-                textEpansion = True
-            return jsonify(send_chat_message("Query expansion toggled"))
         else:
             return jsonify(send_chat_message("unkown command use help for a list of commands"))
     
@@ -100,13 +93,13 @@ def chat():
         yield f"data: {json.dumps(create_chat_message_chunk('.'))}\n\n".encode('utf-8')
 
         print("========= RAG CONTEXT: =============")
-        expanded_queries = [prompt] if not textEpansion else expand_query(prompt)
+        expanded_queries = expand_query(prompt)
         chroma_response = []
         for query in expanded_queries:
-            
             yield f'data: {json.dumps(create_chat_message_chunk("New query: " + query))}\n\n'.encode('utf-8')
             chroma_response.extend(query_chroma(query, 'arxiv-pdfs'))
-        
+        # chroma_response = query_chroma(prompt, 'arxiv-pdfs') # version without the query expander
+
         print("============= Chroma responded =============")
         print(chroma_response)
         if chroma_response is None:

@@ -85,7 +85,7 @@ def expand_query(query, min=3, max=5):
     queries = llm_ollama.chat([
             ChatMessage(
                 role=MessageRole.USER,
-                content="Given the following prompt generate at least " + str(min) + " new queries  (max " + str(max) + ") which can be used to help answer the input prompt. INPUT: " + query +  "|| Format the output as a comma-separated list of the generated queries with no other formatting or text.")
+                content="Given the following prompt, generate at least " + str(min) + " new queries (max " + str(max) + ") that can be used to effectively search a vector embeddings database to find relevant information to help answer the original prompt. Focus on identifying key topics and entities from the input, and generate queries that use synonyms, related terms, and alternate phrasings to thoroughly search for pertinent information. INPUT: " + query +  "|| Format the output as a comma-separated list of the generated queries with no other formatting or text.")
         ])
     print("Mistral querry generation: " + queries.message.content)
     
