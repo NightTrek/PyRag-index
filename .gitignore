@@ -4,3 +4,5 @@ mini-arxiv-pdfs
 db
 init.py
 .DS_Store
+**/__pycache__
+chroma_db

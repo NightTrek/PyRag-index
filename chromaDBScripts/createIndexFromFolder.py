@@ -96,7 +96,7 @@ def expand_query(query, min=3, max=5):
         print(f"Error parsing newline-separated list: {queries.message.content}")
         new_queries = [query]
     
-    print("New Queries" + str(new_queries))
+    # print("New Queries" + str(new_queries))
     return new_queries
 
 def query_with_ollama(query, collection_name = "mini-arxiv-pdfs"):
