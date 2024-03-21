@@ -76,11 +76,20 @@ def query_chroma(query, collection_name = "mini-arxiv-pdfs"):
 def expand_query(query, min=3, max=5):
     llm_ollama = Ollama(model="mistral", request_timeout=30.0)
     queries = llm_ollama.chat([
-            ChatMessage(role=MessageRole.USER, content="Given the following prompt generate at least " + min + " new queries  (max " + max + ") which can be used to help answer the input prompt. INPUT: " + query +  "|| Fromat the output into a single json object containing a results array which has the generated queries in the array. Here is an example of the array: {queries: ['query1', 'query2', 'query3']}")
+            ChatMessage(
+                role=MessageRole.USER,
+                content="Given the following prompt generate at least " + str(min) + " new queries  (max " + str(max) + ") which can be used to help answer the input prompt. INPUT: " + query +  "|| Format the output as a comma-separated list of the generated queries with no other formatting or text.")
         ])
-    print("Mistral querry generation: " + queries)
-    new_queries = json.loads(queries.message.content)['queries']
-    print("New Queries" + new_queries)
+    print("Mistral querry generation: " + queries.message.content)
+    
+    try:
+        new_queries = queries.message.content.strip().split("\n")
+        new_queries = [q.strip().split(". ")[1] for q in new_queries if ". " in q]
+    except:
+        print(f"Error parsing newline-separated list: {queries.message.content}")
+        new_queries = [query]
+    
+    print("New Queries" + str(new_queries))
     return new_queries
 
 def query_with_ollama(query, collection_name = "mini-arxiv-pdfs"):
