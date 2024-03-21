@@ -43,3 +43,26 @@ def createChoices(role, content, logprobs, finish_reason):
 def create_chat_message_chunk(message):
     choice = createChoices(role="assistant", content=message, logprobs="null", finish_reason="None")
     return createChunk(choices=choice)
+
+def send_chat_message(message):
+    return {
+        "id": "chatcmpl-123",
+        "object": "chat.completion",
+        "created": 1677652288,
+        "model": "gpt-3.5-turbo-0125",
+        "system_fingerprint": "fp_44709d6fcb",
+        "choices": [{
+            "index": 0,
+            "message": {
+            "role": "assistant",
+            "content": message,
+            },
+            "logprobs": "null",
+            "finish_reason": "stop"
+        }],
+        "usage": {
+            "prompt_tokens": 9,
+            "completion_tokens": 12,
+            "total_tokens": 21
+        }
+    }
