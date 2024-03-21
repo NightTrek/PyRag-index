@@ -7,7 +7,7 @@ def convert_chunk_to_api(chunk):
                 "system_fingerprint": chunk.system_fingerprint,
                 "choices": [
                     {
-                        "index":"0",
+                        "index":chunk.choices[0].index,
                         "delta":{
                             "role":chunk.choices[0].delta.role,
                             "content":chunk.choices[0].delta.content},
@@ -38,3 +38,8 @@ def createChoices(role, content, logprobs, finish_reason):
                 "finish_reason": finish_reason
             }
         ],
+
+
+def create_chat_message_chunk(message):
+    choice = createChoices(role="assistant", content=message, logprobs="null", finish_reason="None")
+    return createChunk(choices=choice)
