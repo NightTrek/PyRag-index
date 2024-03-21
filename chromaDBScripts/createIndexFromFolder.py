@@ -69,21 +69,19 @@ def fetch_chroma_index(collection_name):
 
 
 def query_chroma(query, collection_name = "mini-arxiv-pdfs"):
-    llm_ollama = Ollama(model="mistral", request_timeout=30.0)
-    queries = llm_ollama.chat([
-            ChatMessage(role=MessageRole.USER, content="Given the following prompt generate at least 3 new queries  (max 5) which can be used to help answer the input prompt. INPUT: " + query +  "|| Fromat the output into a single json object containing a results array which has the generated queries in the array")
-        ])
-    new_queries = json.loads(queries.message.content)['queries']
-    new_queries = [q['query'] for q in new_queries]
-    print(new_queries)
-
     vector_index = fetch_chroma_index(collection_name)
     query_engine = vector_index.as_retriever()
-    response = []
-    for q in new_queries:
-        response.extend(query_engine.retrieve(q))
-    return response
+    return query_engine.retrieve(query)
 
+def expand_query(query, min=3, max=5):
+    llm_ollama = Ollama(model="mistral", request_timeout=30.0)
+    queries = llm_ollama.chat([
+            ChatMessage(role=MessageRole.USER, content="Given the following prompt generate at least " + min + " new queries  (max " + max + ") which can be used to help answer the input prompt. INPUT: " + query +  "|| Fromat the output into a single json object containing a results array which has the generated queries in the array. Here is an example of the array: {queries: ['query1', 'query2', 'query3']}")
+        ])
+    print("Mistral querry generation: " + queries)
+    new_queries = json.loads(queries.message.content)['queries']
+    print("New Queries" + new_queries)
+    return new_queries
 
 def query_with_ollama(query, collection_name = "mini-arxiv-pdfs"):
     llm_ollama = Ollama(model="mistral:latest", request_timeout=30.0)
