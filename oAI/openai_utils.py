@@ -17,7 +17,7 @@ def convert_chunk_to_api(chunk):
                 ],
             }
 
-def createChunk(id="0", object="chat.completion.chunk", created=1694268190, model="gpt-3.5-turbo-0125", system_fingerprint="fp_44709d6fcb", choices):
+def createChunk(choices, id="0", object="chat.completion.chunk", created=1694268190, model="gpt-3.5-turbo-0125", system_fingerprint="fp_44709d6fcb"):
     return {
             "id": id,
             "object": object,
