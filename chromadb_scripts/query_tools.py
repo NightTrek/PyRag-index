@@ -22,3 +22,5 @@ def expand_query_ollama(query, min=3, max=5, model="mistral"):
     
     # print("New Queries" + str(new_queries))
     return new_queries
+
+

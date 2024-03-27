@@ -46,11 +46,11 @@ def create_chat_message_chunk(message):
 
 def send_chat_message(message):
     return {
-        "id": "chatcmpl-123",
+        "id": "gen-4Ya6uSF9iAkdWXlpIvOuhhkVdBmR",
         "object": "chat.completion",
         "created": 1677652288,
         "model": "gpt-3.5-turbo-0125",
-        "system_fingerprint": "fp_44709d6fcb",
+        "system_fingerprint": "None",
         "choices": [{
             "index": 0,
             "message": {
@@ -66,3 +66,20 @@ def send_chat_message(message):
             "total_tokens": 21
         }
     }
+
+
+# ChatCompletionChunk(id='gen-4Ya6uSF9iAkdWXlpIvOuhhkVdBmR',
+#                     choices=[
+#                         Choice(
+#                             delta=ChoiceDelta(
+#                                         content='.',
+#                                         function_call=None,
+#                                         role='assistant',
+#                                         tool_calls=None),
+#                             finish_reason=None,
+#                             index=0,
+#                             logprobs=None)],
+#                     created=1711063003,
+#                     model='anthropic/claude-3-sonnet',
+#                     object='chat.completion',
+#                     system_fingerprint=None)
