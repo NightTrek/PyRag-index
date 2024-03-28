@@ -1,11 +1,15 @@
-from vaultAPI.file_chipper import FileChipperResponse, chunk_files
+
 from typing import List, Dict, Optional
 from pydantic import BaseModel
-
 import requests
 import datetime
 import os 
+import sys
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from vaultAPI.file_chipper import FileChipperResponse, chunk_files
+import init
+init.init()
 
 class MetadataItem(BaseModel):
     chunk_html: str
@@ -25,7 +29,7 @@ class TrieveSearchResponse(BaseModel):
     total_chunk_pages: int = 0
 
 
-def upload_chunks( dataset_id, chunks: list[FileChipperResponse], api_key = os.environ['TRIVE_API_KEY']):
+def upload_chunks( dataset_id, chunks, api_key = os.environ['TRIVE_API_KEY']):
     url = f'https://api.trieve.ai/api/chunk'
     headers = {
         'Authorization': api_key, # Your Trieve API Key from the dashboard
@@ -33,15 +37,10 @@ def upload_chunks( dataset_id, chunks: list[FileChipperResponse], api_key = os.e
         'Content-Type': 'application/json'
     }
     for chunk in chunks:
-        
+        print(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))
         data = {
             'chunk_html': chunk.text, # The text content of the chunk you want indexed
-            'link': "https://ntrek.dev", # The link to the chunk if it exists on the web
-            'tag_set': ["arxiv", "vaultAPI"], # Tags to be associated with the chunk. You can use these tags to filter your search results
-            'timestamp': datetime.now().isoformat(), # Set the timestamp to the current date and time when the script is run
-            'tracking_id': "chunk1", # Any unique identifier you want to associate with the chunk to help you correlate it with your data
-            'metadata': chunk.positionData.to_json(), # Any additional metadata you want to associate with the chunk
-            'weight': 1 # You can use this param to give a weight to the chunk. i.e. > 1 will push it up in the results, < 1 will push it down in the results
+            'metadata': chunk.positionData[0].to_json(), # Any additional metadata you want to associate with the chunk
         }
         response = requests.post(url, headers=headers, json=data)
         print(response.json())
@@ -49,11 +48,14 @@ def upload_chunks( dataset_id, chunks: list[FileChipperResponse], api_key = os.e
 
 def vault_chunk_and_upload(file_path, dataset_id = os.environ["TRIVE_DATASET_ID"]):
     print("Chunking files...")
-    chunks = chunk_files(file_path)
+    chunks = chunk_files(file_path, batch_size=1)
+    if len(chunks) <= 1:
+        print("No chunks created.")
+        return
     print(f"created {len(chunks)} chunks")
     print("Uploading chunks...")
     upload_chunks(dataset_id, chunks)
-    print("Done!")
+    # print("Done!")
 
 
 def search_chunks(
@@ -93,8 +95,8 @@ def search_chunks(
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
-        
-        return TrieveSearchResponse(response.json())
+
+        return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error occurred while making the request: {e}")
         return None
