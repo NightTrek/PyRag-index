@@ -224,6 +224,116 @@ def vaultChat():
 
     return Response(generate(), mimetype='text/event-stream')
 
+@app.route('/v1/vault-trieve', methods=['POST'])
+def vault_Trieve():
+    data = request.get_json()
+    print("========= DATA: =============")
+    print(data)
+
+    # Extract the parameters from the request
+    model = data.get('model', 'gpt-3.5-turbo-instruct')
+    prompt = next((message['content'] for message in reversed(data['messages']) if message['role'] == 'user'), '')
+    temperature = data.get('temperature', 0.1)
+    max_tokens = data.get('max_tokens', 256)
+    top_p = data.get('top_p', 1)
+    frequency_penalty = data.get('frequency_penalty', 0)
+    presence_penalty = data.get('presence_penalty', 0)
+    stream = data.get('stream', False)
+
+    if prompt.startswith('/'):
+        command = prompt[1:].split(' ')[0]
+        if command == 'help':
+            return jsonify(send_chat_message("""
+                Available commands:\n/
+                help - Show this help message\n/
+                cd <directory> - Change the directory to be indexed
+                expand_query - Enable or disable llm based query expansion
+            """))
+        elif command == 'cd':
+            directory = prompt[len(command)+2:]
+            # TODO: Implement logic to change the directory to be indexed
+            return jsonify(send_chat_message("TODO implement changing directory"))
+        else:
+            return jsonify(send_chat_message("unkown command use help for a list of commands"))
+    
+    if stream == False:
+        return jsonify({
+        "id": "chatcmpl-123",
+        "object": "chat.completion",
+        "created": 1677652288,
+        "model": "gpt-3.5-turbo-0125",
+        "system_fingerprint": "fp_44709d6fcb",
+        "choices": [{
+            "index": 0,
+            "message": {
+            "role": "assistant",
+            "content": "\n\nHello there, how may I assist you today?",
+            },
+            "logprobs": "null",
+            "finish_reason": "stop"
+        }],
+        "usage": {
+            "prompt_tokens": 9,
+            "completion_tokens": 12,
+            "total_tokens": 21
+        }
+        })
+        print("========= RAG CONTEXT: =============")
+        chroma_response = query_chroma(prompt, 'arxiv-pdfs')
+        print("============= Chroma responded =============")
+        print(chroma_response)
+        print("========= Request: =============")
+
+        if chroma_response is None:
+            print("Chroma returned None")
+            chroma_response = ""
+        completion = client.chat.completions.create(
+            model='anthropic/claude-3-sonnet',
+            messages=[
+                {"role": "user", "content": "CONTEXT: " + str(chroma_response) + " || QUESTION: " + prompt},
+            ],
+        )
+        return jsonify(completion.model_dump_json())
+
+    print("========= Request: =============")
+    def generate():
+        yield f"data: {json.dumps(create_chat_message_chunk('Let me research this question for a second.'))}\n\n".encode('utf-8')
+        yield f"data: {json.dumps(create_chat_message_chunk('.'))}\n\n".encode('utf-8')
+        yield f"data: {json.dumps(create_chat_message_chunk('.'))}\n\n".encode('utf-8')
+
+        print("========= RAG CONTEXT: =============")
+        # expanded_queries = expand_query_ollama(prompt)
+        # chroma_response = []
+        # for query in expanded_queries:
+        #     yield f'data: {json.dumps(create_chat_message_chunk("New query: " + query))}\n\n'.encode('utf-8')
+        #     chroma_response.extend(query_chroma(query, 'arxiv-pdfs'))
+        # # chroma_response = query_chroma(prompt, 'arxiv-pdfs') # version without the query expander
+        rag_responseA = retrive_chunks(query=prompt)
+        rag_responseB = search_chunks(query=prompt, limit=32)
+
+        print("============= RAG A responded =============")
+        print(rag_responseA)
+        print("============= RAG B responded =============")
+        print(rag_responseB)
+        print("========= Response STATS: =============")
+        # print(f"Number of chunks: {len(rag_response['contexts'][0])}")
+        if rag_responseA is None:
+            print("rag returned None")
+            rag_responseA = ""
+        if rag_responseB is None:
+                print("rag returned None")
+                rag_responseB = ""
+        for chunk in client.chat.completions.create(
+            model='anthropic/claude-3-sonnet',
+            messages=[
+                {"role": "user", "content": "Given context A and context B rate which is better at helping answer this question and why || QUESTION: " + prompt + "|| CONTEXT A: " + str(rag_responseA) + " || CONTEXT B: " + str(rag_responseB)},
+            ],
+            stream=True
+        ):
+            yield f"data: {json.dumps(convert_chunk_to_api(chunk))}\n\n".encode('utf-8')
+
+    return Response(generate(), mimetype='text/event-stream')
+
 @app.route('/v1/models', methods=['GET'])
 def models():
     
