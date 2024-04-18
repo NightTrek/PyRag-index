@@ -7,14 +7,15 @@ from llama_index.llms.ollama import Ollama
 from pydantic.v1.error_wrappers import ValidationError
 import chromadb
 
-
+EMBEDDING_MODEL = "mxbai-embed-large:latest"
+# EMBEDDING_MODEL = "nomic-embed-text:latest"
 
 chroma_client = chromadb.Client()
 
 def fetch_chroma_index(collection_name):
     db = chromadb.PersistentClient(path="./chroma_db")
     chroma_collection = db.get_or_create_collection(collection_name)
-    embed_model = OllamaEmbedding(model_name="nomic-embed-text:latest")
+    embed_model = OllamaEmbedding(model_name=EMBEDDING_MODEL)
 
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     index = VectorStoreIndex.from_vector_store(

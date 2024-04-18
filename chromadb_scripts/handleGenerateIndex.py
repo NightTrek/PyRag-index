@@ -12,6 +12,8 @@ from pydantic.v1.error_wrappers import ValidationError
 import chromadb
 import json
 
+EMBEDDING_MODEL = "mxbai-embed-large:latest"
+# EMBEDDING_MODEL = "nomic-embed-text:latest"
 
 # this function needs to run in main otherwise it will fail
 def generate_index_from_folder(index_path, collection_name, override=False):
@@ -26,7 +28,7 @@ def generate_index_from_folder(index_path, collection_name, override=False):
         chroma_collection = db.get_or_create_collection(collection_name)
     
     # define embedding function
-    embed_model = OllamaEmbedding(model_name="nomic-embed-text:latest")
+    embed_model = OllamaEmbedding(model_name=EMBEDDING_MODEL)
     #llm 
 
     # load documents
@@ -47,7 +49,7 @@ def generate_index_from_folder(index_path, collection_name, override=False):
             # TitleExtractor(llm=Ollama(model="mistral")),
             # SummaryExtractor(llm=Ollama(model="yarn-mistral", context_window=(1024*16)), num_sentences=5),
             # QuestionsAnsweredExtractor(llm=Ollama(model="yarn-mistral", context_window=(1024*16))),
-            OllamaEmbedding(model_name="nomic-embed-text:latest")
+            OllamaEmbedding(model_name=EMBEDDING_MODEL)
         ]
     )
     print("Completed Index Generation: " + collection_name)
@@ -58,10 +60,19 @@ def generate_index_from_folder(index_path, collection_name, override=False):
 
 def main():
     if len(sys.argv) < 2:
-        print("Please provide the directory as a command-line argument.")
+        print("Please provide the directory as a command-line argument using --path and the collection name using --name.")
         sys.exit(1)
-    directory = sys.argv[1]
-    generate_index_from_folder(directory, directory, override=True)
+    directory = None
+    collection_name = None
+    for i in range(1, len(sys.argv), 2):
+        if sys.argv[i] == "--path":
+            directory = sys.argv[i+1]
+        elif sys.argv[i] == "--name":
+            collection_name = sys.argv[i+1]
+    if directory is None or collection_name is None:
+        print("Please provide both --path and --name arguments.")
+        sys.exit(1)
+    generate_index_from_folder(directory, collection_name, override=True)
 
 if __name__ == '__main__':
     main()
